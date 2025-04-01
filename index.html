@@ -66,6 +66,9 @@
       color: #fffd74;
       text-shadow: 1px 1px 2px black;
       animation: pulse 1s infinite;
+      display: block;
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
     }
     @keyframes pulse {
       0% { transform: scale(1); }
@@ -85,6 +88,23 @@
       display: none;
       z-index: 9999;
     }
+    .section-box {
+      padding: 1rem;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+    }
+    .section-questions {
+      background-color: rgba(0, 123, 255, 0.2);
+    }
+    .section-turns {
+      background-color: rgba(108, 117, 125, 0.2);
+    }
+    .section-score {
+      background-color: rgba(40, 167, 69, 0.2);
+    }
+    .section-utils {
+      background-color: rgba(220, 53, 69, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -101,16 +121,32 @@
   </div>
 
   <div class="card-custom hidden" id="game">
+    <div id="current-player-name" class="current-player"></div>
     <div id="question" class="mb-3 fw-bold fs-4">Press Start to begin</div>
     <div class="player-list" id="player-status"></div>
-    <div>
+
+    <div class="section-box section-questions">
+      <h5>🎲 שאלות</h5>
       <button class="btn btn-primary m-1" onclick="nextQuestion()">שאלה</button>
       <button class="btn btn-warning m-1" onclick="nextTwist()">טוויסט</button>
       <button class="btn btn-info m-1" onclick="nextRandom()">אקראי</button>
-      <button class="btn btn-success m-1" onclick="addPoint()">+ נקודה</button>
+    </div>
+
+    <div class="section-box section-turns">
+      <h5>🏁 תורות</h5>
       <button class="btn btn-secondary m-1" onclick="nextPlayer()">תור הבא</button>
+    </div>
+
+    <div class="section-box section-score">
+      <h5>⭐ ניקוד</h5>
+      <button class="btn btn-success m-1" onclick="addPoint()">+ נקודה</button>
+    </div>
+
+    <div class="section-box section-utils">
+      <h5>🔧 אחר</h5>
       <button class="btn btn-danger m-1" onclick="resetGame()">איפוס</button>
     </div>
+
     <div class="mt-4">
       <input type="text" id="customQuestion" placeholder="הוסף שאלה משלך..." class="form-control mb-2">
       <button class="btn btn-outline-light" onclick="addCustomQuestion()">➕ הוסף שאלה</button>
@@ -118,7 +154,6 @@
   </div>
 
   <div id="winner-modal"></div>
-
   <script>
     const questions = [
       "למי אתה הכי נמשך בשולחן?",
