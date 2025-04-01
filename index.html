@@ -85,6 +85,25 @@
       display: none;
       z-index: 9999;
     }
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      display: none;
+      font-size: 1.1rem;
+      z-index: 10000;
+      animation: fadeInOut 3s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(20px); }
+    }
     @media (max-width: 768px) {
       main.game-layout {
         flex-direction: column;
@@ -97,7 +116,7 @@
   <h1>Awkward</h1>
   <button class="btn btn-outline-light mb-3" onclick="playMusic()">🎵 הפעל מוזיקה</button>
   <audio id="bg-music" src="victory.mp3" loop></audio>
-
+  <div id="toast"></div>
   <main class="game-layout">
     <section class="game-column">
       <div class="card-custom" id="player-setup">
@@ -106,29 +125,26 @@
           <input type="text" placeholder="שחקן 1" class="form-control" />
           <input type="text" placeholder="שחקן 2" class="form-control" />
         </div>
-        <input type="number" id="pointsToWin" placeholder="נקודות לניצחון (5)" class="form-control mt-3 mb-2" min="1" />
+        <input type="number" id="pointsToWin" placeholder="נקודות לניצחון (ברירת מחדל: 5)" class="form-control mt-3 mb-2" min="1" />
         <button class="btn btn-light m-2" onclick="addPlayerInput()">הוסף שחקן</button>
         <button class="btn btn-success m-2" onclick="startGame()">התחל משחק</button>
       </div>
 
       <div class="card-custom hidden" id="game">
         <div id="current-player-name" class="current-player"></div>
-        <div class="mb-2">
-          <strong id="question-type-label">סוג: ?</strong>
-          <button class="btn btn-sm btn-outline-light" onclick="changeQuestionType()">🔁 שנה סוג</button>
-        </div>
+        <div class="mb-2"><strong id="question-type-label">סוג: ?</strong> <button class="btn btn-sm btn-outline-light" onclick="changeQuestionType()">🔁 שנה סוג</button></div>
         <div id="question" class="mb-3 fw-bold fs-4">לחץ שנה סוג להתחלה</div>
 
         <div class="d-flex justify-content-between mb-2">
           <button class="btn btn-success w-50 me-1" onclick="addPoint()">➕ הוסף נקודה</button>
-          <button class="btn btn-danger w-50 ms-1" onclick="toggleTransfer()">➡ העבר נקודה</button>
+          <button class="btn btn-danger w-50 ms-1" onclick="toggleTransfer()">➡️ העבר נקודה</button>
         </div>
         <div id="transferContainer" class="mb-3 hidden">
           <select id="transferTarget" class="form-select mb-2"></select>
           <button class="btn btn-warning" onclick="transferPoint()">אשר</button>
         </div>
 
-        <button class="btn btn-primary w-100" onclick="nextPlayer()">🔄 לתור הבא</button>
+        <button class="btn btn-primary w-100" onclick="nextPlayer()">🔁 לתור הבא</button>
       </div>
     </section>
 
@@ -143,147 +159,156 @@
         <ul id="score-board" class="score-table list-unstyled"></ul>
       </div>
       <div class="card-custom">
-        <h5>⚖️ הגדרות</h5>
-        <button class="btn btn-danger" onclick="resetGame()">🔄 איפוס</button>
+        <h5>🔧 הגדרות</h5>
+        <button class="btn btn-danger" onclick="resetGame()">🔁 איפוס</button>
       </div>
     </aside>
   </main>
-
   <div id="winner-modal"></div>
-  <script>
-    const regularQuestions = [
-      "מה הגילטי פלז'ר שלך?",
-      "מה ההרגל הכי מוזר שלך?",
-      "אם היית יכול לחזור לרגע אחד בחיים – מה הוא היה?"
-    ];
-    const twistQuestions = [
-      "קלף טוויסט: העבר את השאלה למישהו אחר!",
-      "קלף טוויסט: אתה עונה במקום מישהו אחר!",
-      "קלף טוויסט: גנוב נקודה מהשחקן שלידך!"
-    ];
+<script>
+let players = [];
+let currentPlayer = 0;
+let pointsToWin = 5;
+let currentQuestionType = "רגילה";
 
-    let players = [];
-    let currentPlayer = 0;
-    let pointsToWin = 5;
-    let currentQuestionType = "רגילה";
+const regularQuestions = [
+  "מה הגילטי פלז'ר שלך?",
+  "מה ההרגל הכי מוזר שלך?",
+  "אם היית יכול לחזור לרגע אחד בחיים – מה הוא היה?"
+];
+const twistQuestions = [
+  "קלף טוויסט: העבר את השאלה למישהו אחר!",
+  "קלף טוויסט: אתה עונה במקום מישהו אחר!",
+  "קלף טוויסט: גנוב נקודה מהשחקן שלידך!"
+];
 
-    function playMusic() {
-      const audio = document.getElementById('bg-music');
-      audio.volume = 0.5;
-      audio.play().catch(err => alert("יש לאפשר אודיו בדפדפן"));
-    }
+function playMusic() {
+  const audio = document.getElementById('bg-music');
+  audio.volume = 0.5;
+  audio.play().catch(err => alert("יש לאפשר אודיו בדפדפן"));
+}
 
-    function addPlayerInput() {
-      const div = document.getElementById('player-inputs');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = `שחקן ${div.children.length + 1}`;
-      input.className = 'form-control';
-      div.appendChild(input);
-    }
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
 
-    function startGame() {
-      const inputs = document.querySelectorAll('#player-inputs input');
-      const names = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
-      const uniqueNames = [...new Set(names)];
-      if (names.length < 2 || names.length !== uniqueNames.length) {
-        alert("ודא שכל השמות תקינים ואינם כפולים");
-        return;
-      }
-      players = uniqueNames.map(name => ({ name, score: 0 }));
-      const pts = parseInt(document.getElementById('pointsToWin').value);
-      if (!isNaN(pts) && pts > 0) pointsToWin = pts;
-      document.getElementById('player-setup').classList.add('hidden');
-      document.getElementById('game').classList.remove('hidden');
-      updatePlayerStatus();
-      updateScoreBoard();
-      fillTransferSelect();
-      changeQuestionType();
-    }
+function addPlayerInput() {
+  const div = document.getElementById('player-inputs');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = `שחקן ${div.children.length + 1}`;
+  input.className = 'form-control';
+  div.appendChild(input);
+}
 
-    function updatePlayerStatus() {
-      document.getElementById('current-player-name').textContent = `תור: ${players[currentPlayer].name}`;
-      updateScoreBoard();
-    }
+function startGame() {
+  const inputs = document.querySelectorAll('#player-inputs input');
+  const names = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
+  const uniqueNames = [...new Set(names)];
+  if (names.length < 2 || names.length !== uniqueNames.length) {
+    alert("ודא שכל השמות תקינים ואינם כפולים");
+    return;
+  }
+  players = uniqueNames.map(name => ({ name, score: 0 }));
+  const pts = parseInt(document.getElementById('pointsToWin').value);
+  if (!isNaN(pts) && pts > 0) pointsToWin = pts;
+  document.getElementById('player-setup').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  updatePlayerStatus();
+  updateScoreBoard();
+  fillTransferSelect();
+  changeQuestionType();
+}
 
-    function updateScoreBoard() {
-      const ul = document.getElementById('score-board');
-      ul.innerHTML = players.map(p => `<li>${p.name}: ${p.score}</li>`).join('');
-    }
+function updatePlayerStatus() {
+  document.getElementById('current-player-name').textContent = `תור: ${players[currentPlayer].name}`;
+  updateScoreBoard();
+  fillTransferSelect();
+}
 
-    function fillTransferSelect() {
-      const select = document.getElementById('transferTarget');
-      select.innerHTML = players.map((p, i) => i !== currentPlayer ? `<option value="${i}">${p.name}</option>` : '').join('');
-    }
+function updateScoreBoard() {
+  const ul = document.getElementById('score-board');
+  ul.innerHTML = players.map(p => `<li>${p.name}: ${p.score}</li>`).join('');
+}
 
-    function toggleTransfer() {
-      const container = document.getElementById('transferContainer');
-      container.classList.toggle('hidden');
-    }
+function nextPlayer() {
+  currentPlayer = (currentPlayer + 1) % players.length;
+  updatePlayerStatus();
+}
 
-    function nextPlayer() {
-      currentPlayer = (currentPlayer + 1) % players.length;
-      updatePlayerStatus();
-      fillTransferSelect();
-    }
+function addPoint() {
+  players[currentPlayer].score++;
+  updatePlayerStatus();
+  showToast(`${players[currentPlayer].name} הרוויח נקודה!`);
+  checkWinner();
+}
 
-    function addPoint() {
-      players[currentPlayer].score++;
-      updatePlayerStatus();
-      checkWinner();
-    }
+function toggleTransfer() {
+  const container = document.getElementById('transferContainer');
+  container.classList.toggle('hidden');
+}
 
-    function transferPoint() {
-      const toIndex = parseInt(document.getElementById('transferTarget').value);
-      if (players[currentPlayer].score > 0 && toIndex !== currentPlayer) {
-        players[currentPlayer].score--;
-        players[toIndex].score++;
-        updatePlayerStatus();
-        checkWinner();
-      } else {
-        alert("אין מספיק נקודות להעברה");
-      }
-    }
+function fillTransferSelect() {
+  const select = document.getElementById('transferTarget');
+  if (!select) return;
+  select.innerHTML = players.map((p, i) => i !== currentPlayer ? `<option value="${i}">${p.name}</option>` : '').join('');
+}
 
-    function checkWinner() {
-      const winner = players.find(p => p.score >= pointsToWin);
-      if (winner) {
-        confetti();
-        const modal = document.getElementById('winner-modal');
-        modal.innerHTML = `<h2>🎉 ${winner.name} ניצח/ה את המשחק! 🎉</h2><button class='btn btn-dark mt-3' onclick='resetGame()'>משחק חדש</button>`;
-        modal.style.display = 'block';
-      }
-    }
+function transferPoint() {
+  const toIndex = parseInt(document.getElementById('transferTarget').value);
+  if (players[currentPlayer].score > 0 && toIndex !== currentPlayer) {
+    players[currentPlayer].score--;
+    players[toIndex].score++;
+    updatePlayerStatus();
+    showToast(`${players[currentPlayer].name} העביר נקודה ל-${players[toIndex].name}!`);
+    checkWinner();
+  } else {
+    alert("אין מספיק נקודות להעברה");
+  }
+}
 
-    function changeQuestionType() {
-      currentQuestionType = (currentQuestionType === "רגילה") ? "טוויסט" : "רגילה";
-      document.getElementById("question-type-label").textContent = `סוג: ${currentQuestionType}`;
-      showQuestion();
-    }
+function checkWinner() {
+  const winner = players.find(p => p.score >= pointsToWin);
+  if (winner) {
+    confetti();
+    const modal = document.getElementById('winner-modal');
+    modal.innerHTML = `<h2>🎉 ${winner.name} ניצח/ה את המשחק! 🎉</h2><button class='btn btn-dark mt-3' onclick='resetGame()'>משחק חדש</button>`;
+    modal.style.display = 'block';
+  }
+}
 
-    function showQuestion() {
-      let q = "";
-      if (currentQuestionType === "רגילה") {
-        q = regularQuestions[Math.floor(Math.random() * regularQuestions.length)];
-      } else {
-        q = twistQuestions[Math.floor(Math.random() * twistQuestions.length)];
-      }
-      document.getElementById('question').textContent = q;
-    }
+function changeQuestionType() {
+  currentQuestionType = currentQuestionType === "רגילה" ? "טוויסט" : "רגילה";
+  document.getElementById("question-type-label").textContent = `סוג: ${currentQuestionType}`;
+  showQuestion();
+}
 
-    function addCustomQuestion() {
-      const input = document.getElementById('customQuestion');
-      const val = input.value.trim();
-      if (val.length > 3) {
-        regularQuestions.push(val);
-        alert("השאלה נוספה!");
-        input.value = "";
-      }
-    }
+function showQuestion() {
+  let q = "";
+  if (currentQuestionType === "רגילה") {
+    q = regularQuestions[Math.floor(Math.random() * regularQuestions.length)];
+  } else {
+    q = twistQuestions[Math.floor(Math.random() * twistQuestions.length)];
+  }
+  document.getElementById('question').textContent = q;
+}
 
-    function resetGame() {
-      location.reload();
-    }
-  </script>
+function addCustomQuestion() {
+  const input = document.getElementById('customQuestion');
+  const val = input.value.trim();
+  if (val.length > 3) {
+    regularQuestions.push(val);
+    alert("השאלה נוספה!");
+    input.value = "";
+  }
+}
+
+function resetGame() {
+  location.reload();
+}
+</script>
 </body>
 </html>
