@@ -14,7 +14,24 @@ function setMusicVolume(value) {
   const audio = document.getElementById('bg-music');
   audio.volume = parseFloat(value);
 }
+function pauseMusic() {
+  const audio = document.getElementById('bg-music');
+  audio.pause();
+}
 
+function setMusicVolume(value) {
+  const audio = document.getElementById('bg-music');
+  audio.volume = parseFloat(value);
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  document.body.style.background = isDark
+    ? 'linear-gradient(135deg, #121212, #343a40)'
+    : 'linear-gradient(135deg, #f72585, #7209b7)';
+  document.body.style.color = isDark ? 'white' : 'white';
+}
 </script>
   <style>
     * { box-sizing: border-box; }
@@ -120,11 +137,21 @@ function setMusicVolume(value) {
         align-items: center;
       }
     }
-  </style>
+  body.dark-mode .card-custom {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+body.dark-mode .score-table li {
+  color: white;
+}
+body.dark-mode .btn-close {
+  filter: invert(1);
+}
+</style>
 </head>
 <body>
   <h1>Awkward</h1>
-  <button class="btn btn-outline-light mb-3" onclick="playMusic()">🎵 הפעל מוזיקה</button>
+  
   <audio id="bg-music" src="victory.mp3" loop></audio>
   <div id="toast"></div>
   <main class="game-layout">
@@ -158,19 +185,24 @@ function setMusicVolume(value) {
       </div>
     </section>
 
-    <aside class="control-panel">
+    <aside class="control-panel offcanvas offcanvas-start text-bg-dark rounded-start shadow-lg" tabindex="-1" id="settingsPanel" style="max-width: 320px;">
       <div class="card-custom">
         <h5>➕ הוסף שאלה</h5>
         <input type="text" id="customQuestion" placeholder="שאלה חדשה..." class="form-control mb-2" />
         <button class="btn btn-outline-light" onclick="addCustomQuestion()">הוסף</button>
       </div>
+      
       <div class="card-custom">
-        <h5>🏆 ניקוד</h5>
-        <ul id="score-board" class="score-table list-unstyled"></ul>
-      </div>
-      <div class="card-custom">
-        <h5>🔧 הגדרות</h5>
-        <div class="mb-3">
+        <h5 class="d-flex justify-content-between align-items-center">🔧 הגדרות
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </h5>
+        <div class="mb-3 border-bottom pb-3 mb-4">
+          <label class="form-label">🌗 מצב תצוגה</label>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+            <label class="form-check-label" for="darkModeToggle">מצב כהה</label>
+          </div>
+          <hr class="text-white my-3" />
           <label class="form-label">🎵 שליטת מוזיקה</label>
           <div class="d-flex justify-content-between">
             <button class="btn btn-outline-success w-50 me-1" onclick="playMusic()">▶️ נגן</button>
@@ -178,10 +210,21 @@ function setMusicVolume(value) {
           </div>
           <input type="range" class="form-range mt-2" min="0" max="1" step="0.01" value="0.5" onchange="setMusicVolume(this.value)" />
         </div>
-        <button class="btn btn-danger" onclick="resetGame()">🔁 איפוס</button>
+        <button class="btn btn-danger btn-lg w-100 mt-3" onclick="resetGame()">🔁 איפוס המשחק</button>
       </div>
     </aside>
   </main>
+
+<!-- דשבורד ניקוד קבוע -->
+<div class="position-fixed top-0 end-0 m-3 bg-white text-dark p-3 rounded shadow" style="z-index: 9999; max-width: 200px;">
+  <h5 class="mb-2">🏆 ניקוד</h5>
+  <ul id="score-board" class="score-table list-unstyled mb-0"></ul>
+</div>
+
+<!-- כפתור פתיחת הגדרות -->
+<button class="btn btn-secondary btn-lg position-fixed bottom-0 start-0 m-3 rounded-pill px-4 shadow" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel">
+  ⚙️ אפשרויות
+</button>
   <div id="winner-modal"></div>
 <script>
 let players = [];
@@ -328,5 +371,6 @@ function resetGame() {
   location.reload();
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
