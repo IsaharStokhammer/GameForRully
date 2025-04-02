@@ -1,0 +1,113 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #f72585, #7209b7);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1 {
+  font-size: 4rem;
+  margin: 2rem 0 1rem;
+  animation: pop 1s ease-in-out infinite alternate;
+}
+@keyframes pop {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+main.game-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 1rem;
+  width: 100%;
+  max-width: 1200px;
+}
+section.game-column, aside.control-panel {
+  flex: 1;
+  max-width: 600px;
+}
+.card-custom {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  text-align: center;
+  width: 100%;
+}
+input, select {
+  padding: 0.5rem;
+  margin: 0.3rem;
+  border-radius: 1rem;
+  border: none;
+}
+.hidden { display: none; }
+.current-player {
+  font-weight: bold;
+  color: #fffd74;
+  text-shadow: 1px 1px 2px black;
+  animation: pulse 1s infinite;
+  font-size: 1.4rem;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+.score-table { text-align: right; }
+.score-table li { margin: 0.2rem 0; }
+#winner-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: black;
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  display: none;
+  z-index: 9999;
+}
+#toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  display: none;
+  font-size: 1.1rem;
+  z-index: 10000;
+  animation: fadeInOut 3s ease-in-out;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+@media (max-width: 768px) {
+  main.game-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+body.dark-mode .card-custom {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+body.dark-mode .score-table li {
+  color: white;
+}
+body.dark-mode .btn-close {
+  filter: invert(1);
+}

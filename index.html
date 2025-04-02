@@ -5,127 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Awkward</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f72585, #7209b7);
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    h1 {
-      font-size: 4rem;
-      margin: 2rem 0 1rem;
-      animation: pop 1s ease-in-out infinite alternate;
-    }
-    @keyframes pop {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
-    }
-    main.game-layout {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 2rem;
-      padding: 1rem;
-      width: 100%;
-      max-width: 1200px;
-    }
-    section.game-column, aside.control-panel {
-      flex: 1;
-      max-width: 600px;
-    }
-    .card-custom {
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 1rem;
-      padding: 2rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      text-align: center;
-      width: 100%;
-    }
-    input, select {
-      padding: 0.5rem;
-      margin: 0.3rem;
-      border-radius: 1rem;
-      border: none;
-    }
-    .hidden { display: none; }
-    .current-player {
-      font-weight: bold;
-      color: #fffd74;
-      text-shadow: 1px 1px 2px black;
-      animation: pulse 1s infinite;
-      font-size: 1.4rem;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.07); }
-      100% { transform: scale(1); }
-    }
-    .score-table { text-align: right; }
-    .score-table li { margin: 0.2rem 0; }
-    #winner-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      color: black;
-      padding: 2rem;
-      border-radius: 1rem;
-      text-align: center;
-      display: none;
-      z-index: 9999;
-    }
-    #toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: rgba(0, 0, 0, 0.85);
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 1rem;
-      display: none;
-      font-size: 1.1rem;
-      z-index: 10000;
-      animation: fadeInOut 3s ease-in-out;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateY(20px); }
-      10% { opacity: 1; transform: translateY(0); }
-      90% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(20px); }
-    }
-    @media (max-width: 768px) {
-      main.game-layout {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
-  body.dark-mode .card-custom {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: white;
-}
-body.dark-mode .score-table li {
-  color: white;
-}
-body.dark-mode .btn-close {
-  filter: invert(1);
-}
-</style>
 </head>
 <body>
   <h1>Awkward</h1>
-  
-  <audio id="bg-music" src="victory.mp3" loop></audio>
+
+  <audio id="bg-music" src="assets/victory.mp3" loop preload="auto"></audio>
+
   <div id="toast"></div>
   <main class="game-layout">
     <section class="game-column">
@@ -142,8 +29,13 @@ body.dark-mode .btn-close {
 
       <div class="card-custom hidden" id="game">
         <div id="current-player-name" class="current-player"></div>
-        <div class="mb-2"><strong id="question-type-label">סוג: ?</strong> <button class="btn btn-sm btn-outline-light" onclick="changeQuestionType()">🔁 שנה סוג</button></div>
-        <div id="question" class="mb-3 fw-bold fs-4">לחץ שנה סוג להתחלה</div>
+        <div class="mb-2">
+          <strong id="question-type-label">קטגוריה: ?</strong>
+          <button class="btn btn-sm btn-outline-light" onclick="changeQuestionCategory()">🔁 שנה קטגוריה</button>
+        </div>
+
+        <!-- ✅ השאלה מוצגת כאן -->
+        <div id="question" class="mb-3 fw-bold fs-4">לחץ שנה קטגוריה להתחלה</div>
 
         <div class="d-flex justify-content-between mb-2">
           <button class="btn btn-success w-50 me-1" onclick="addPoint()">➕ הוסף נקודה</button>
@@ -166,7 +58,7 @@ body.dark-mode .btn-close {
       </div>
       
       <div class="card-custom">
-        <h5 class="d-flex justify-content-between align-items-center">🔧 הגדרות
+        <h5 class="d-flex justify-content-between align-items-center">⚖️ הגדרות
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </h5>
         <div class="mb-3 border-bottom pb-3 mb-4">
@@ -197,214 +89,19 @@ body.dark-mode .btn-close {
     </aside>
   </main>
 
-<!-- דשבורד ניקוד קבוע -->
-<div class="position-fixed top-0 end-0 m-3 bg-white text-dark p-3 rounded shadow" style="z-index: 9999; max-width: 200px;">
-  <h5 class="mb-2">🏆 ניקוד</h5>
-  <ul id="score-board" class="score-table list-unstyled mb-0"></ul>
-</div>
+  <!-- דשבורד ניקוד קבוע -->
+  <div class="position-fixed top-0 end-0 m-3 bg-white text-dark p-3 rounded shadow" style="z-index: 9999; max-width: 200px;">
+    <h5 class="mb-2">🏆 ניקוד</h5>
+    <ul id="score-board" class="score-table list-unstyled mb-0"></ul>
+  </div>
 
-<!-- כפתור פתיחת הגדרות -->
-<button class="btn btn-secondary btn-lg position-fixed bottom-0 start-0 m-3 rounded-pill px-4 shadow" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel">
-  ⚙️ אפשרויות
-</button>
+  <!-- כפתור פתיחת הגדרות -->
+  <button class="btn btn-secondary btn-lg position-fixed bottom-0 start-0 m-3 rounded-pill px-4 shadow" data-bs-toggle="offcanvas" data-bs-target="#settingsPanel">
+    ⚙️ אפשרויות
+  </button>
+
   <div id="winner-modal"></div>
-<script>
-let players = [];
-let currentPlayer = 0;
-let pointsToWin = 5;
-let currentQuestionType = "רגילה";
-
-const regularQuestions = [
-  "מה הגילטי פלז'ר שלך?",
-  "מה ההרגל הכי מוזר שלך?",
-  "אם היית יכול לחזור לרגע אחד בחיים – מה הוא היה?"
-];
-const twistQuestions = [
-  "קלף טוויסט: העבר את השאלה למישהו אחר!",
-  "קלף טוויסט: אתה עונה במקום מישהו אחר!",
-  "קלף טוויסט: גנוב נקודה מהשחקן שלידך!"
-];
-
-function playMusic() {
-  const audio = document.getElementById('bg-music');
-  audio.volume = 0.5;
-  audio.play().catch(err => alert("יש לאפשר אודיו בדפדפן"));
-}
-
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 3000);
-}
-
-function addPlayerInput() {
-  const div = document.getElementById('player-inputs');
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = `שחקן ${div.children.length + 1}`;
-  input.className = 'form-control';
-  div.appendChild(input);
-}
-
-function startGame() {
-  playClick();
-  const inputs = document.querySelectorAll('#player-inputs input');
-  const names = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
-  const uniqueNames = [...new Set(names)];
-  if (names.length < 2 || names.length !== uniqueNames.length) {
-    alert("ודא שכל השמות תקינים ואינם כפולים");
-    return;
-  }
-  players = uniqueNames.map(name => ({ name, score: 0 }));
-  const pts = parseInt(document.getElementById('pointsToWin').value);
-  if (!isNaN(pts) && pts > 0) pointsToWin = pts;
-  document.getElementById('player-setup').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
-  updatePlayerStatus();
-  updateScoreBoard();
-  fillTransferSelect();
-  changeQuestionType();
-}
-
-function updatePlayerStatus() {
-  document.getElementById('current-player-name').textContent = `תור: ${players[currentPlayer].name}`;
-  updateScoreBoard();
-  fillTransferSelect();
-}
-
-function updateScoreBoard() {
-  const ul = document.getElementById('score-board');
-  ul.innerHTML = players.map(p => `<li>${p.name}: ${p.score}</li>`).join('');
-}
-
-function nextPlayer() {
-  currentPlayer = (currentPlayer + 1) % players.length;
-  updatePlayerStatus();
-}
-
-function addPoint() {
-  players[currentPlayer].score++;
-  updatePlayerStatus();
-  showToast(`${players[currentPlayer].name} הרוויח נקודה!`);
-  checkWinner();
-}
-
-function toggleTransfer() {
-  const container = document.getElementById('transferContainer');
-  container.classList.toggle('hidden');
-}
-
-function fillTransferSelect() {
-  const select = document.getElementById('transferTarget');
-  if (!select) return;
-  select.innerHTML = players.map((p, i) => i !== currentPlayer ? `<option value="${i}">${p.name}</option>` : '').join('');
-}
-
-function transferPoint() {
-  playClick();
-  const toIndex = parseInt(document.getElementById('transferTarget').value);
-  if (players[currentPlayer].score > 0 && toIndex !== currentPlayer) {
-    players[currentPlayer].score--;
-    players[toIndex].score++;
-    updatePlayerStatus();
-    showToast(`${players[currentPlayer].name} העביר נקודה ל-${players[toIndex].name}!`);
-    checkWinner();
-  } else {
-    alert("אין מספיק נקודות להעברה");
-  }
-}
-
-function checkWinner() {
-  const winner = players.find(p => p.score >= pointsToWin);
-  if (winner) {
-    confetti();
-    playWinnerSound();
-    const modal = document.getElementById('winner-modal');
-    modal.innerHTML = `
-      <h2>🎉 ${winner.name} ניצח/ה את המשחק! 🎉</h2>
-      <button class='btn btn-dark mt-3' onclick='resetGame()'>משחק חדש</button>
-    `;
-    modal.style.display = 'block';
-  }
-}
-
-function changeQuestionType() {
-  currentQuestionType = currentQuestionType === "רגילה" ? "טוויסט" : "רגילה";
-  document.getElementById("question-type-label").textContent = `סוג: ${currentQuestionType}`;
-  showQuestion();
-}
-
-function showQuestion() {
-  let q = "";
-  if (currentQuestionType === "רגילה") {
-    q = regularQuestions[Math.floor(Math.random() * regularQuestions.length)];
-  } else {
-    q = twistQuestions[Math.floor(Math.random() * twistQuestions.length)];
-  }
-  document.getElementById('question').textContent = q;
-}
-
-function addCustomQuestion() {
-  const input = document.getElementById('customQuestion');
-  const val = input.value.trim();
-  if (val.length > 3) {
-    regularQuestions.push(val);
-    playClick();
-    alert("השאלה נוספה!");
-    input.value = "";
-  }
-}
-
-function resetGame() {
-  location.reload();
-}
-function pauseMusic() {
-  const audio = document.getElementById('bg-music');
-  audio.pause();
-}
-
-function setMusicVolume(value) {
-  const audio = document.getElementById('bg-music');
-  audio.volume = parseFloat(value);
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  document.body.style.background = isDark
-    ? 'linear-gradient(135deg, #121212, #343a40)'
-    : 'linear-gradient(135deg, #f72585, #7209b7)';
-  document.body.style.color = isDark ? 'white' : 'white';
-}
-const clickSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_5fd96a7611.mp3');
-const winnerSound = new Audio('https://cdn.pixabay.com/audio/2023/03/07/audio_8ce9e09c86.mp3');
-let sfxVolume = 1;
-
-function setSfxVolume(value) {
-  sfxVolume = parseFloat(value);
-}
-
-function playClick() {
-  clickSound.volume = sfxVolume;
-  clickSound.currentTime = 0;
-  clickSound.play();
-}
-
-function playWinnerSound() {
-  winnerSound.volume = sfxVolume;
-  winnerSound.currentTime = 0;
-  winnerSound.play();
-}
-
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.style.display = 'block';
-  playClick();
-  setTimeout(() => { toast.style.display = 'none'; }, 3000);
-}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="game.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
