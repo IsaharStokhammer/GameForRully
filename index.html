@@ -28,14 +28,17 @@
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userInfo = document.getElementById('user-info');
+    const welcomeBanner = document.getElementById('welcome-banner');
 
     loginBtn.addEventListener('click', async () => {
       try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        userInfo.textContent = `מחובר כ: ${user.displayName}`;
+        userInfo.innerHTML = `<img src="${user.photoURL}" class="rounded-circle me-2" style="width:32px"> ${user.displayName}`;
+        welcomeBanner.innerHTML = `<h3 class="text-success">ברוך הבא 👋, ${user.displayName}</h3>`;
         loginBtn.classList.add('d-none');
         logoutBtn.classList.remove('d-none');
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       } catch (error) {
         alert("שגיאת התחברות: " + error.message);
       }
@@ -44,13 +47,15 @@
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       userInfo.textContent = "";
+      welcomeBanner.innerHTML = "";
       loginBtn.classList.remove('d-none');
       logoutBtn.classList.add('d-none');
     });
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        userInfo.textContent = `מחובר כ: ${user.displayName}`;
+        userInfo.innerHTML = `<img src="${user.photoURL}" class="rounded-circle me-2" style="width:32px"> ${user.displayName}`;
+        // welcomeBanner.innerHTML = `<h3 class="text-success">ברוך הבא 👋, ${user.displayName}</h3>`;
         loginBtn.classList.add('d-none');
         logoutBtn.classList.remove('d-none');
       }
@@ -66,6 +71,8 @@
     <button id="logout-btn" class="btn btn-danger d-none">🔓 התנתק</button>
     <span id="user-info" class="fw-bold text-white"></span>
   </div>
+
+  <div id="welcome-banner" class="mb-3"></div>
 
   <audio id="bg-music" src="assets/victory.mp3" loop preload="auto"></audio>
 
