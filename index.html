@@ -53,6 +53,16 @@
     <aside class="control-panel offcanvas offcanvas-start text-bg-dark rounded-start shadow-lg" tabindex="-1" id="settingsPanel" style="max-width: 320px;">
       <div class="card-custom">
         <h5>➕ הוסף שאלה</h5>
+        <select id="categorySelect" class="form-select mb-2" onchange="toggleNewCategoryInput(this.value)">
+          <option value="" disabled selected>בחר קטגוריה</option>
+          <option value="מביך">מביך</option>
+          <option value="מצחיק">מצחיק</option>
+          <option value="אישי">אישי</option>
+          <option value="מה היית עושה אם...">מה היית עושה אם...</option>
+          <option value="טוויסט">טוויסט</option>
+          <option value="new">קטגוריה חדשה</option>
+        </select>
+        <input type="text" id="newCategoryInput" class="form-control mb-2 hidden" placeholder="שם קטגוריה חדשה" />
         <input type="text" id="customQuestion" placeholder="שאלה חדשה..." class="form-control mb-2" />
         <button class="btn btn-outline-light" onclick="addCustomQuestion()">הוסף</button>
       </div>

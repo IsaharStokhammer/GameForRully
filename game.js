@@ -1,16 +1,3 @@
-/* הוספת אנימציה עם fade-in לשאלה */
-const style = document.createElement('style');
-style.innerHTML = `
-.fade-in {
-  animation: fadeInBounce 0.6s ease;
-}
-@keyframes fadeInBounce {
-  0% { opacity: 0; transform: scale(0.8); }
-  60% { opacity: 1; transform: scale(1.05); }
-  100% { transform: scale(1); }
-}`;
-document.head.appendChild(style);
-
 // קוד המשחק עם שאלות לפי קטגוריות (כולל טוויסט כקטגוריה)
 let players = [];
 let currentPlayer = 0;
@@ -185,17 +172,47 @@ function addCustomQuestion() {
   const input = document.getElementById('customQuestion');
   const val = input.value.trim();
   if (val.length < 3) return;
-  let category = prompt("לאיזו קטגוריה להוסיף את השאלה? (הזן שם חדש או בחר קיים: " + Object.keys(questions).join(", ") + ")");
-  if (!category) return;
-  category = category.trim();
-  if (!questions[category]) {
-    questions[category] = [];
-    showToast("נוצרה קטגוריה חדשה: " + category);
+
+  const categorySelect = document.getElementById('categorySelect');
+  let category = categorySelect?.value;
+
+  if (!category) {
+    alert("יש לבחור קטגוריה או להזין אחת חדשה");
+    return;
   }
+
+  if (category === "new") {
+    category = document.getElementById('newCategoryInput').value.trim();
+    if (!category) {
+      alert("יש להזין שם קטגוריה חדשה");
+      return;
+    }
+
+    if (!questions[category]) {
+      questions[category] = [];
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      categorySelect.insertBefore(option, categorySelect.lastElementChild);
+    }
+  }
+
+  if (!questions[category]) questions[category] = [];
   questions[category].push(val);
   playClick();
-  alert("השאלה נוספה לקטגוריה " + category);
+  showToast("השאלה נוספה לקטגוריה " + category);
   input.value = "";
+  document.getElementById('newCategoryInput').classList.add('hidden');
+  categorySelect.value = "";
+}
+
+function toggleNewCategoryInput(value) {
+  const newCatInput = document.getElementById('newCategoryInput');
+  if (value === 'new') {
+    newCatInput.classList.remove('hidden');
+  } else {
+    newCatInput.classList.add('hidden');
+  }
 }
 
 function resetGame() {
